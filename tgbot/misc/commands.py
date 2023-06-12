@@ -15,5 +15,6 @@ async def register_bot_commands(bot: Bot):
         BotCommand(command="/add_executor",
                    description="Добавить исполнителя к заданию"),
         BotCommand(command="/finish_task", description="Завершить задание"),
+        BotCommand(command="/get_task", description="Получить задание")
     ]
     await bot.set_my_commands(commands, scope=BotCommandScopeDefault())

@@ -1,7 +1,7 @@
 import asyncio
 import logging
 
-import betterlogging as bl
+import betterlogging     as bl
 from aiogram import Bot, Dispatcher
 from aiogram.fsm.storage.memory import MemoryStorage
 from aiogram.fsm.storage.redis import RedisStorage, DefaultKeyBuilder

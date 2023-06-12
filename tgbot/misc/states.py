@@ -3,6 +3,7 @@ from aiogram.fsm.state import StatesGroup, State
 
 class User(StatesGroup):
     GET_ROLE = State()
+    WAITING_FOR_TASK_NAME = State()
 
 class Admin(StatesGroup):
     WAITING_FOR_ADD_CHECKER = State()

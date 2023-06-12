@@ -4,7 +4,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
 
 from tgbot.filters.admin import AdminFilter
-from tgbot.misc.json_work import json_add, json_read, json_write, remove_json, append_json
+from tgbot.misc.json_work import json_add, remove_json, append_json, task_create
 from tgbot.misc.states import Admin
 
 from tgbot.models.quest import Quest
@@ -55,7 +55,6 @@ async def create_task(message: Message, state: FSMContext):
 @admin_router.message(Admin.WAITING_FOR_TASK_NAME)
 async def create_task(message: Message, state: FSMContext):
     quest.set_quest_name(message.text)
-    json_add('tasks.json', f'{quest.get_quest_name()}')
     await message.answer("Введите описание задания")
     await state.set_state(Admin.WAITING_FOR_TASK_DESCRIPTION)
 
@@ -69,7 +68,7 @@ async def create_task(message: Message, state: FSMContext):
 async def create_task(message: Message, state: FSMContext):
     quest.set_time_limit(message.text)
     await state.clear()
-    append_json('tasks.json', f'{quest.get_quest_name()}', quest.get_quest_description())
+    task_create(quest)
     await message.answer(f"Задание создано {quest.get_quest_name()}\n{quest.get_quest_description()}\n{quest.get_time_limit()}")
 
 @admin_router.message(Command(commands="add_executor"))

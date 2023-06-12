@@ -1,6 +1,51 @@
 {
-    "f": [],
-    "загрузка": [
-        "добавить фото"
-    ]
+    "task_1": {
+        "checker_id": "checker_1",
+        "worker_list": [
+            "worker_1",
+            "worker_2"
+        ],
+        "name": "Task 1",
+        "description": "This is task 1",
+        "status": "pending",
+        "time": "12.12.2012 12:12"
+    },
+    "task_2": {
+        "checker_id": "checker_2",
+        "worker_list": [
+            "worker_1",
+            "worker_2"
+        ],
+        "name": "Task 2",
+        "description": "This is task 2",
+        "status": "pending",
+        "time": "12.12.2012 12:12"
+    },
+    "task_3": {
+        "checker_id": "checker_3",
+        "worker_list": [
+            "worker_1",
+            "worker_2"
+        ],
+        "name": "Task 3",
+        "description": "This is task 3",
+        "status": "pending",
+        "time": "12.12.2012 12:12"
+    },
+    "": {
+        "name": "А",
+        "description": "Ааа",
+        "status": "",
+        "time": "А",
+        "checker_id": "",
+        "worker_list": []
+    },
+    "Привет": {
+        "name": "Привет",
+        "description": "Это наше тестовое задание",
+        "status": "",
+        "time": "1@493",
+        "checker_id": "",
+        "worker_list": []
+    }
 }

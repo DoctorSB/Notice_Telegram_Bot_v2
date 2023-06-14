@@ -4,7 +4,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
 
 from tgbot.filters.admin import AdminFilter
-from tgbot.misc.json_work import json_add, remove_json, append_json, task_create
+from tgbot.misc.json_work import remove_json, append_json, task_create
 from tgbot.misc.states import Admin
 
 from tgbot.models.quest import Quest

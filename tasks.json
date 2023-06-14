@@ -32,19 +32,19 @@
         "status": "pending",
         "time": "12.12.2012 12:12"
     },
-    "": {
-        "name": "А",
-        "description": "Ааа",
-        "status": "",
-        "time": "А",
-        "checker_id": "",
-        "worker_list": []
-    },
     "Привет": {
         "name": "Привет",
         "description": "Это наше тестовое задание",
         "status": "",
         "time": "1@493",
+        "checker_id": "",
+        "worker_list": []
+    },
+    "новое задание": {
+        "name": "новое задание",
+        "description": "что то очень важное",
+        "status": "",
+        "time": "12 12 12",
         "checker_id": "",
         "worker_list": []
     }

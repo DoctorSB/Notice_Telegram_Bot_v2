@@ -16,9 +16,9 @@ def json_write(file_name, data):
         json.dump(data, f, ensure_ascii=False, indent=4)
 
 
-def json_add(file_name, key):
+def json_add_worker(file_name, key, id):
     data = json_read(file_name)
-    data[key] = []
+    data[key]["worker_list"].append()
     json_write(file_name, data)
 
 
@@ -42,6 +42,7 @@ def output_all(file_name):
         text += f'Task name: {task_data["name"]}\n'
     return text
 
+
 def task_create(task):
     data = json_read('tasks.json')
     key = task.quest_name
@@ -54,7 +55,6 @@ def task_create(task):
     data[key]["checker_id"] = task.checker_id
     data[key]["worker_list"] = task.workers_list
     json_write('tasks.json', data)
-    
 
 
 def task_output(file_name, task_name):

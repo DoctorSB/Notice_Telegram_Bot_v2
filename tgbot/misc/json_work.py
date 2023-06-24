@@ -18,7 +18,7 @@ def json_write(file_name, data):
 
 def json_add_worker(file_name, key, id):
     data = json_read(file_name)
-    data[key]["worker_list"].append()
+    data[key]["worker_list"].append(id)
     json_write(file_name, data)
 
 
@@ -50,6 +50,7 @@ def task_create(task):
     data[key] = {}
     data[key]["name"] = task.quest_name
     data[key]["description"] = task.quest_description
+    data[key]["files"] = task.files
     data[key]["status"] = task.quest_status
     data[key]["time"] = task.time_limit
     data[key]["checker_id"] = task.checker_id
@@ -63,7 +64,13 @@ def task_output(file_name, task_name):
     text += f'Task name: {data[task_name]["name"]}\n'
     text += f'Task description: {data[task_name]["description"]}\n'
     text += f'Task status: {data[task_name]["status"]}\n'
+    text += f'Task files: {data[task_name]["files"]}\n'
     text += f'Task time limit: {data[task_name]["time"]}\n'
     text += f'Task checker: {data[task_name]["checker_id"]}\n'
     text += f'Task workers: {data[task_name]["worker_list"]}\n'
     return text
+
+def json_add_photo(file_name, key, photo_id):
+    data = json_read(file_name)
+    data[key]["files"].append(photo_id)
+    json_write(file_name, data)

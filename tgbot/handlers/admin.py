@@ -47,10 +47,12 @@ async def remove_checker(message: Message, state: FSMContext):
     await state.clear()
     await message.answer("Вы удалили пользователя из проверяющих")
 
+
 @admin_router.message(Command(commands="create_task"))
 async def create_task(message: Message, state: FSMContext):
     await state.set_state(Admin.WAITING_FOR_TASK_NAME)
     await message.answer("Введите название задания")
+
 
 @admin_router.message(Admin.WAITING_FOR_TASK_NAME)
 async def create_task(message: Message, state: FSMContext):
@@ -58,11 +60,13 @@ async def create_task(message: Message, state: FSMContext):
     await message.answer("Введите описание задания")
     await state.set_state(Admin.WAITING_FOR_TASK_DESCRIPTION)
 
+
 @admin_router.message(Admin.WAITING_FOR_TASK_DESCRIPTION)
 async def create_task(message: Message, state: FSMContext):
     quest.set_quest_description(message.text)
     await message.answer("Введите время на выполнение задания в формате ДД.ММ.ГГГГ ЧЧ:ММ")
     await state.set_state(Admin.WAITING_FOR_TASK_TIME_LIMIT)
+
 
 @admin_router.message(Admin.WAITING_FOR_TASK_TIME_LIMIT)
 async def create_task(message: Message, state: FSMContext):
@@ -71,12 +75,10 @@ async def create_task(message: Message, state: FSMContext):
     task_create(quest)
     await message.answer(f"Задание создано {quest.get_quest_name()}\n{quest.get_quest_description()}\n{quest.get_time_limit()}")
 
+
 @admin_router.message(Command(commands="add_executor"))
 async def add_executor(message: Message, state: FSMContext):
     await state.set_state(Admin.WAITING_FOR_ADD_EXECUTOR)
     await message.answer("Введите id пользователя, которого хотите добавить в исполнители")
     quest.add_worker_id(message.text)
     await state.clear()
-
-
-

@@ -7,6 +7,8 @@ class User(StatesGroup):
     WAITING_FOR_TASK_NAME = State()
     ACCEPT_OR_CANCEL = State()
     WORK_ON_TASK = State()
+    CHOOSE_TASK = State()
+    SEND_FILE = State()
 
 
 class Admin(StatesGroup):

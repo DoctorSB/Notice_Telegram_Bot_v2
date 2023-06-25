@@ -66,7 +66,7 @@ async def append_photo(message: Message, state: FSMContext):
         json = json_read('tasks.json')
         info = await state.get_data()
         json[info['task_name']]["status"] = status
-        await state.finish()
+        await state.finish() # type: ignore
 
 
 @user_router.message(Command(commands="my_tasks"))
@@ -75,7 +75,9 @@ async def get_my_tasks(message: Message, state: FSMContext):
         if message.from_user.id in json_read('tasks.json')[key]["worker_list"]:
             text = task_output('tasks.json', key)
             await message.answer(text=text, reply_markup=task_work)
+            await state.update_data(task_name=key)
             await state.set_state(User.CHOOSE_TASK)
+
 
 @user_router.callback_query(User.CHOOSE_TASK)
 async def choose_task(query, state: FSMContext):
@@ -90,4 +92,4 @@ async def choose_task(query, state: FSMContext):
         json[info['task_name']]["status"] = status
         json_write('tasks.json', json)
 
-#await state.set_state(User.WORK_ON_TASK)
+# await state.set_state(User.WORK_ON_TASK)

@@ -74,3 +74,7 @@ def json_add_photo(file_name, key, photo_id):
     data = json_read(file_name)
     data[key]["files"].append(photo_id)
     json_write(file_name, data)
+
+def json_keys(file_name):
+    data = json_read(file_name)
+    return data.keys()

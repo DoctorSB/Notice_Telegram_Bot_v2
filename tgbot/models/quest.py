@@ -1,10 +1,9 @@
 class Quest:
-    def __init__(self, checker_id='', workers_list=[],files=[], quest_name='', quest_description='', quest_id='', quest_status='', time_limit=''):
+    def __init__(self, checker_id='', workers_list=[],files=[], quest_name='', quest_description='', quest_status="on_work", time_limit=''):
         self.checker_id = checker_id
         self.workers_list = workers_list
         self.quest_name = quest_name
         self.quest_description = quest_description
-        self.quest_id = quest_id
         self.files = files
         self.quest_status = quest_status
         self.time_limit = time_limit
@@ -35,13 +34,7 @@ class Quest:
 
     def set_quest_description(self, quest_description):
         self.quest_description = quest_description
-
-    def get_quest_id(self):
-        return self.quest_id
-
-    def set_quest_id(self, quest_id):
-        self.quest_id = quest_id
-
+        
     def get_quest_status(self):
         return self.quest_status
 

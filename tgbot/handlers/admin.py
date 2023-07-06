@@ -4,7 +4,9 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, ReplyKeyboardRemove
 
 from tgbot.filters.admin import AdminFilter
-from tgbot.misc.json_work import remove_json, append_json, task_create, json_read, json_write, json_keys, json_add_worker, json_add_photo
+# from tgbot.misc.json_work import remove_json, append_json, task_create, json_read, json_write, json_keys, json_add_worker, json_add_photo
+from tgbot.database.db import add_task, add_task_files, add_task_worker, get_array_len, get_array_values, get_task_data, get_task_names_by_worker_id, update_task_status, update_task_worker_list
+
 from tgbot.misc.data_formater import date_formater
 from tgbot.misc.states import Admin
 
@@ -35,6 +37,7 @@ async def get_checker_id(message: Message, state: FSMContext): # type: ignore
 @admin_router.message(Admin.WAITING_FOR_ADD_CHECKER)
 async def set_checker_id(message: Message, state: FSMContext):
     checker.set_id(message.text)
+
     append_json('data.json', 'checkers', checker.get_id())
     await state.clear()
     await message.answer("Вы сделали пользователя проверяющим")
@@ -84,7 +87,7 @@ async def create_task(message: Message, state: FSMContext):
     quest.set_time_limit(str(date))
     quest.set_checker_id(message.from_user.id)
     await state.clear()
-    task_create(quest)
+    add_task(quest.get_quest_name(), quest.get_quest_description(), quest.get_quest_status(), quest.get_time_limit(), quest.get_checker_id())
     await message.answer(f"Задание создано")
 
 
@@ -104,5 +107,5 @@ async def get_task_id(query, state: FSMContext):
 @admin_router.message(Admin.WAITING_FOR_ADD_EXECUTOR)
 async def add_executor_id(message: Message, state: FSMContext):
     info = await state.get_data()
-    json_add_worker('tasks.json', info['task_id'], message.forward_from.id)
+    add_task_worker(info['task_id'], message.forward_from.id)
     await state.clear()

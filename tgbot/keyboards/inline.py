@@ -1,5 +1,7 @@
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from tgbot.misc.json_work import json_read
+from tgbot.database.db import add_task, add_task_files, add_task_worker, get_array_len, get_array_values, get_task_data, get_task_names_by_worker_id, update_task_status, update_task_worker_list
+
 
 
 accept_button = [[InlineKeyboardButton(text="Принять", callback_data="accept")],
@@ -8,11 +10,11 @@ accept_button = [[InlineKeyboardButton(text="Принять", callback_data="acc
 task_keyboard = InlineKeyboardMarkup(inline_keyboard=accept_button)
 
 
-def task_preview_keyboard(json_file):
-    data = json_read(json_file)
+def task_preview_keyboard(id):
+    data = get_task_names_by_worker_id(id)
     keyboard = []
-    for key in data:
-        keyboard.append([InlineKeyboardButton(text=key, callback_data=key)])
+    for name in data:
+        keyboard.append([InlineKeyboardButton(text=name, callback_data=name)])
     return InlineKeyboardMarkup(inline_keyboard=keyboard)
 
 

@@ -7,7 +7,8 @@ from aiogram.fsm.context import FSMContext
 from aiogram.utils.markdown import hcode
 
 from tgbot.misc.states import User
-from tgbot.misc.json_work import json_read, task_output, json_add_worker, json_add_photo, json_write
+from tgbot.database.db import add_task, add_task_files, add_task_worker, get_array_len, get_array_values, get_task_data, get_task_names_by_worker_id, update_task_status, update_task_worker_list
+
 from tgbot.keyboards.inline import task_keyboard, task_preview_keyboard, task_work
 from tgbot.text.shablons import ams, apparatus, afy
 
@@ -22,29 +23,27 @@ async def user_start(message: Message):
 @user_router.message(Command(commands="get_task"))
 async def get_task(message: Message, state: FSMContext):
     await state.update_data(user_id=message.from_user.id)
-    await message.answer(f"Вот список заданий:", reply_markup=task_preview_keyboard('tasks.json'))
+    await message.answer(f"Вот список заданий:", reply_markup=task_preview_keyboard(message.from_user.id))
     await state.set_state(User.WAITING_FOR_TASK_NAME)
 
 
 @user_router.callback_query(User.WAITING_FOR_TASK_NAME)
 async def get_task_info(query, state: FSMContext):
-    for key in json_read('tasks.json'):
-        if key == query.data:
-            text = task_output('tasks.json', query.data)
-            await state.update_data(task_name=query.data)
-            await query.message.edit_text(text=text, reply_markup=task_keyboard)
-            await state.set_state(User.ACCEPT_OR_CANCEL)
+    tasks = get_task_names_by_worker_id(query.from_user.id)
+    if query.data in tasks:
+        pass
+
 
 
 @user_router.callback_query(User.ACCEPT_OR_CANCEL)
 async def cancel_task(query, state: FSMContext):
     if query.data == "cancel":
-        await query.message.edit_text(f"Вот список заданий:", reply_markup=task_preview_keyboard('tasks.json'))
+        await query.message.edit_text(f"Вот список заданий:", reply_markup=task_preview_keyboard(query.from_user.id))
         await state.set_state(User.WAITING_FOR_TASK_NAME)
     if query.data == "accept":
         info = await state.get_data()
         await query.message.edit_text(f"Задание принято")
-        json_add_worker('tasks.json', info['task_name'], info['user_id'])
+        add_task_worker(info['task_name'], info['user_id'])
 
 
 @user_router.message(User.WORK_ON_TASK_AMS)
@@ -62,26 +61,27 @@ async def work_on_task_apparatus(message: Message, state: FSMContext):
 async def append_photo(message: Message, state: FSMContext):
     if message.photo:
         photo = message.photo[-1]
-        json = json_read('tasks.json')
         info = await state.get_data()
-        json_add_photo('tasks.json', info['task_name'], photo.file_id)
+        add_task_files(info['task_name'], photo.file_id)
     if message.text == "Завершить":
         await message.answer("Задание завершено")
-        status = "done"
-        json = json_read('tasks.json')
+        status = "Completed"
         info = await state.get_data()
-        json[info['task_name']]["status"] = status
+        update_task_status(info['task_name'], status)
         await state.finish() # type: ignore
 
 
 @user_router.message(Command(commands="my_tasks"))
 async def get_my_tasks(message: Message, state: FSMContext):
-    for key in json_read('tasks.json'):
-        if message.from_user.id in json_read('tasks.json')[key]["worker_list"]:
-            text = task_output('tasks.json', key)
-            await message.answer(text=text, reply_markup=task_work)
-            await state.update_data(task_name=key)
-            await state.set_state(User.CHOOSE_TASK)
+    for name in get_task_names_by_worker_id(message.from_user.id):
+        data = get_task_data(name)
+        await message.answer(f"Название: {name}\n"
+                             f"Дата: {data['date']}\n"
+                             f"Статус: {data['status']}\n"
+                             f"Файлы: {data['files']}")
+        await message.answer(f"Задание принято", reply_markup=task_work)
+        await state.update_data(task_name=name)
+        await state.set_state(User.CHOOSE_TASK)
 
 
 @user_router.callback_query(User.CHOOSE_TASK)
@@ -92,8 +92,7 @@ async def choose_task(query, state: FSMContext):
     if query.data == "send_to_check":
         await query.message.edit_text(f"Задание отправлено на проверку")
         status = "waiting"
-        json = json_read('tasks.json')
         info = await state.get_data()
-        json[info['task_name']]["status"] = status
-        json_write('tasks.json', json)
+        update_task_status(info['task_name'], status)
+        await state.finish() # type: ignore
 

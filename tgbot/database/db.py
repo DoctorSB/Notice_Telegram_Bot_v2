@@ -586,6 +586,3 @@ def database_init():
 
     print('Таблицы созданы')
 
-
-if __name__ == '__main__':
-    # database_init()

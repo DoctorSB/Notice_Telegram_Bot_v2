@@ -3,13 +3,13 @@ from aiogram.filters import CommandStart, Command
 from aiogram.types import Message
 from docx import Document
 from aiogram import types, Router, F
-from aiogram.filters import StateFilter
 from aiogram.fsm.context import FSMContext
 from aiogram.utils.markdown import hcode
 
 from tgbot.misc.states import User
 from tgbot.misc.json_work import json_read, task_output, json_add_worker, json_add_photo, json_write
 from tgbot.keyboards.inline import task_keyboard, task_preview_keyboard, task_work
+from tgbot.text.shablons import ams, apparatus, afy
 
 user_router = Router()
 
@@ -47,13 +47,18 @@ async def cancel_task(query, state: FSMContext):
         json_add_worker('tasks.json', info['task_name'], info['user_id'])
 
 
-@user_router.message(User.WORK_ON_TASK)
-async def work_on_task(message: Message, state: FSMContext):
-    await message.answer("Отправьте файлы для проверки")
-    await state.set_state(User.SEND_FILE)
+@user_router.message(User.WORK_ON_TASK_AMS)
+async def work_on_task_ams(message: Message, state: FSMContext):
+    await message.answer(apparatus)
+    await state.set_state(User.SEND_FILE_AMS)
+
+@user_router.message(User.WORK_ON_TASK_APPARATUS)
+async def work_on_task_apparatus(message: Message, state: FSMContext):
+    await message.answer(afy)
+    await state.set_state(User.SEND_FILE_AMS)
 
 
-@user_router.message(User.SEND_FILE)
+@user_router.message(User.SEND_FILE_AMS)
 async def append_photo(message: Message, state: FSMContext):
     if message.photo:
         photo = message.photo[-1]
@@ -82,8 +87,8 @@ async def get_my_tasks(message: Message, state: FSMContext):
 @user_router.callback_query(User.CHOOSE_TASK)
 async def choose_task(query, state: FSMContext):
     if query.data == "add_files":
-        await query.message.edit_text(f"Отправьте файлы для проверки")
-        await state.set_state(User.SEND_FILE)
+        await query.message.edit_text(ams)
+        await state.set_state(User.SEND_FILE_AMS)
     if query.data == "send_to_check":
         await query.message.edit_text(f"Задание отправлено на проверку")
         status = "waiting"
@@ -92,4 +97,3 @@ async def choose_task(query, state: FSMContext):
         json[info['task_name']]["status"] = status
         json_write('tasks.json', json)
 
-# await state.set_state(User.WORK_ON_TASK)

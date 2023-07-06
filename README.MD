@@ -15,7 +15,7 @@
 
 Установите зависимости, выполнив следующую команду в терминале:
 ```
-python3 -m venv venv
+python3.10 -m venv venv
 
 .\venv\Scripts\activate
 

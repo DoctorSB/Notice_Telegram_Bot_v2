@@ -2,6 +2,7 @@ aiogram>=3.0.0b7
 environs~=9.0
 redis
 betterlogging
+json
 
 # # For enabling api:
 # backoff

@@ -6,12 +6,11 @@ class User(StatesGroup):
     GET_ROLE = State()
     WAITING_FOR_TASK_NAME = State()
     ACCEPT_OR_CANCEL = State()
-    WORK_ON_TASK_AMS = State()
     WORK_ON_TASK_APPARATUS = State()
     WORK_ON_TASK_AFY = State()
     WORK_ON_TASK_MATERIALS = State()
     CHOOSE_TASK = State()
-    SEND_FILE_AMS = State()
+    SEND_FILE = State()
 
 
 class Admin(StatesGroup):

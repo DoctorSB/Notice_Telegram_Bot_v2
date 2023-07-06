@@ -61,8 +61,10 @@ def create_tasks_table():
             id          SERIAL PRIMARY KEY,
             name        VARCHAR(255) NOT NULL,
             description TEXT,
-            fi2         TEXT[],
-            files       TEXT[],
+            ams_files         TEXT[],
+            apparat_files       TEXT[],
+            afy_files       TEXT[],
+            materials_files       TEXT[],
             status      VARCHAR(255),
             time        TIMESTAMP,
             checker_id  INTEGER,
@@ -396,8 +398,10 @@ def get_task_data_function():
             (
                 task_name        VARCHAR(255),
                 task_description TEXT,
-                task_fi2         TEXT[],
-                task_files       TEXT[],
+                task_ams_files         TEXT[],
+                task_apparat_files       TEXT[],
+                task_afy_files       TEXT[],
+                task_materials_files       TEXT[],
                 task_status      VARCHAR(255),
                 task_time        TIMESTAMP,
                 checkers_id      INTEGER,
@@ -407,14 +411,16 @@ def get_task_data_function():
     $$
     BEGIN
         RETURN QUERY
-            SELECT name        AS task_name,
-               description AS task_description,
-               fi2         AS task_fi2,
-               files       AS task_files,
-               status      AS task_status,
-               time        AS task_time,
-               checker_id  AS checkers_id,
-               worker_list AS worker_lists
+            SELECT name         AS task_name,
+                description     AS task_description,
+                ams_files       AS task_ams_files,
+                afy_files       AS task_afy_files,
+                apparat_files   AS task_apparat_files,
+                materials_files AS task_materials_files,
+                status          AS task_status,
+                time            AS task_time,
+                checker_id      AS checkers_id,
+                worker_list     AS worker_lists
         FROM tasks
         WHERE name = p_task_name;
     END;
@@ -586,3 +592,6 @@ def database_init():
 
     print('Таблицы созданы')
 
+
+# if __name__ == '__main__':
+#     database_init()

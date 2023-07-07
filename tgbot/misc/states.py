@@ -6,19 +6,16 @@ class User(StatesGroup):
     GET_ROLE = State()
     WAITING_FOR_TASK_NAME = State()
     ACCEPT_OR_CANCEL = State()
-    WORK_ON_TASK_APPARATUS = State()
-    WORK_ON_TASK_AFY = State()
-    WORK_ON_TASK_MATERIALS = State()
+    WAIT_SEND_FILE = State()
     CHOOSE_TASK = State()
     SEND_FILE = State()
 
 
 class Admin(StatesGroup):
-    WAITING_FOR_ADD_CHECKER = State()
-    WAITING_FOR_REMOVE_CHECKER = State()
     WAITING_FOR_TASK_NAME = State()
     WAITING_FOR_TASK_DESCRIPTION = State()
     WAITING_FOR_TASK_TIME_LIMIT = State()
     WAITING_FOR_ADD_EXECUTOR = State()
     WAITING_FOR_TASK_ID = State()
-    
+    WAITING_FOR_REVIEW = State()
+    WAITING_PROVERKA = State()

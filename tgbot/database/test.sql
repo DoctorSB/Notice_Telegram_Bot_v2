@@ -41,11 +41,11 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-select add_task(
-               'Task Name342',
+SELECT add_task(
+               'Task Name',
                'Task Description',
-               'Pending',
-               '2023-07-05 11:00:00',
+               'Waiting',
+               '2023-07-05 12:00:00',
                2
            );
 
@@ -73,19 +73,28 @@ SELECT update_task_files('Task Name4', 'files', ARRAY ['new_file112.txt', 'new_f
 CREATE OR REPLACE FUNCTION update_task_worker_list(
     task_name VARCHAR(255),
     column_name VARCHAR(255),
-    task_worker_list INTEGER[]
+    task_worker_list INT
 )
     RETURNS VOID AS
 $$
+DECLARE
+    count_rows INT;
 BEGIN
-    EXECUTE format('UPDATE tasks SET %I = %I || $1 WHERE name = $2', column_name,
-                   column_name) USING task_worker_list, task_name;
+    EXECUTE format('SELECT COUNT(*) FROM tasks WHERE name = $1 AND $2 = ANY(%I::INT[])', column_name)
+    INTO count_rows
+    USING task_name, task_worker_list;
+
+    IF count_rows = 0 THEN
+        EXECUTE format('UPDATE tasks SET %I = %I || $1 WHERE name = $2', column_name, column_name)
+        USING task_worker_list, task_name;
+    END IF;
 END;
 $$ LANGUAGE plpgsql;
 
 
 -- Добавление значений к массиву в столбце worker_list для задачи с именем "Task Name"
-SELECT update_task_worker_list('Task Name411', 'worker_list', ARRAY [21451, 555]);
+SELECT update_task_worker_list('Task Name', 'worker_list', 2443);
+
 
 ----------------------------------------------------------------------------------------------------------
 
@@ -245,3 +254,82 @@ EXECUTE FUNCTION update_quest_list();
 
 DROP TRIGGER IF EXISTS task_worker_list_trigger ON tasks;
 
+
+---------------------------------------------------------------
+
+CREATE OR REPLACE FUNCTION find_tasks_by_checker_and_status(
+        p_checker_id INTEGER,
+        p_status VARCHAR(255)
+        )
+        RETURNS TABLE
+            (
+                task_name        VARCHAR(255),
+                task_description TEXT,
+                task_ams_files         TEXT[],
+                task_apparat_files       TEXT[],
+                task_afy_files       TEXT[],
+                task_materials_files       TEXT[],
+                task_status      VARCHAR(255),
+                task_time        TIMESTAMP,
+                checkers_id      INTEGER,
+                worker_lists     INTEGER[]
+            )
+    AS
+    $$
+    BEGIN
+        RETURN QUERY
+        SELECT name        AS task_name,
+               description AS task_description,
+               ams_files           AS task_ams_files,
+               apparat_files AS task_apparat_files,
+               afy_files   AS task_afy_files,
+               materials_files AS task_materials_files,
+               status      AS task_status,
+               time        AS task_time,
+               checker_id  AS checkers_id,
+               worker_list AS worker_lists
+    FROM tasks
+    WHERE tasks.checker_id = p_checker_id
+    AND tasks.status = p_status;
+    END;
+    $$ LANGUAGE plpgsql;
+
+
+
+SELECT find_tasks_by_checker_and_status(706443088, 'waiting');
+
+------------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION find_tasks_by_status_and_worker(
+    search_int INT,
+    search_status VARCHAR(255)
+)
+    RETURNS TABLE (name VARCHAR(255)) AS
+$$
+BEGIN
+    RETURN QUERY EXECUTE format('
+        SELECT name
+        FROM tasks
+        WHERE status = $1 AND $2 = ANY(worker_list)'
+    ) USING search_status, search_int;
+END;
+$$ LANGUAGE plpgsql;
+
+
+SELECT name FROM find_tasks_by_status_and_worker(233, 'Waiting');
+
+------------------------------------------------------------------------------
+
+CREATE OR REPLACE FUNCTION get_task_by_name(
+    task_name VARCHAR(255)
+)
+    RETURNS SETOF tasks AS
+$$
+BEGIN
+    RETURN QUERY
+    SELECT *
+    FROM tasks
+    WHERE name = task_name;
+END;
+$$ LANGUAGE plpgsql;
+
+SELECT * FROM get_task_by_name('Task Name');

@@ -1,5 +1,5 @@
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
-from tgbot.database.db import get_task_names_by_worker_id
+from tgbot.database.db import get_task_names_by_worker_id, find_tasks_by_checker_and_status
 
 
 
@@ -21,3 +21,12 @@ task_button = [[InlineKeyboardButton(text="Добавить файлы", callbac
                [InlineKeyboardButton(text="Отправить на проверку", callback_data="send_to_check")]]
 
 task_work = InlineKeyboardMarkup(inline_keyboard=task_button)
+
+
+def tasks_for_review_keyboard(id):
+    data = find_tasks_by_checker_and_status(id, "waiting")
+    keyboard = []
+    for name in data:
+        keyboard.append([InlineKeyboardButton(text=name, callback_data=name)])
+    return InlineKeyboardMarkup(inline_keyboard=keyboard)
+

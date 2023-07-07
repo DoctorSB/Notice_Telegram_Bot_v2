@@ -183,7 +183,7 @@ def add_task_files(task_name, column_name, task_files):
     conn.close()
 
 
-def update_task_worker_list():
+def update_task_worker_list_function():
     conn = connect()
     cursor = conn.cursor()
 
@@ -432,6 +432,7 @@ def get_task_data_function():
     cursor.close()
     conn.close()
 
+
 def get_task_data(task_name):
     conn = connect()
     cursor = conn.cursor()
@@ -482,6 +483,7 @@ def get_task_name_by_worker_id_function():
     cursor.close()
     conn.close()
 
+
 def get_task_names_by_worker_id(worker_id):
     conn = connect()
     cursor = conn.cursor()
@@ -503,6 +505,7 @@ def get_task_names_by_worker_id(worker_id):
     conn.close()
     return res
 
+
 def insert_executor_function():
     conn = connect()
     cursor = conn.cursor()
@@ -521,6 +524,7 @@ def insert_executor_function():
     conn.commit()
     cursor.close()
     conn.close()
+
 
 def insert_executor(telegram_id):
     conn = connect()
@@ -541,6 +545,7 @@ def insert_executor(telegram_id):
     conn.commit()
     cursor.close()
     conn.close()
+
 
 def update_quest_list_trigger_function():
     conn = connect()
@@ -576,6 +581,175 @@ def update_quest_list_trigger_function():
     conn.close()
 
 
+def find_task_by_worker_and_status_function():
+    conn = connect()
+    cursor = conn.cursor()
+
+    create_table_query = '''
+    CREATE OR REPLACE FUNCTION find_tasks_by_status_and_worker(
+        search_int INT,
+        search_status VARCHAR(255)
+    )
+        RETURNS TABLE (name VARCHAR(255)) AS
+    $$
+    BEGIN
+        RETURN QUERY EXECUTE format('
+            SELECT name
+            FROM tasks
+            WHERE status = $1 AND $2 = ANY(worker_list)'
+        ) USING search_status, search_int;
+    END;
+    $$ LANGUAGE plpgsql;
+    '''
+
+    cursor.execute(create_table_query)
+    conn.commit()
+    cursor.close()
+    conn.close()
+
+
+def find_tasks_by_checker_and_status_function():
+    conn = connect()
+    cursor = conn.cursor()
+
+    create_table_query = '''
+    
+CREATE OR REPLACE FUNCTION find_tasks_by_checker_and_status(
+        p_checker_id INTEGER,
+        p_status VARCHAR(255)
+        )
+        RETURNS TABLE
+            (
+                task_name        VARCHAR(255),
+                task_description TEXT,
+                task_ams_files         TEXT[],
+                task_apparat_files       TEXT[],
+                task_afy_files       TEXT[],
+                task_materials_files       TEXT[],
+                task_status      VARCHAR(255),
+                task_time        TIMESTAMP,
+                checkers_id      INTEGER,
+                worker_lists     INTEGER[]
+            )
+    AS
+    $$
+    BEGIN
+        RETURN QUERY
+        SELECT name        AS task_name,
+               description AS task_description,
+               ams_files           AS task_ams_files,
+               apparat_files AS task_apparat_files,
+               afy_files   AS task_afy_files,
+               materials_files AS task_materials_files,
+               status      AS task_status,
+               time        AS task_time,
+               checker_id  AS checkers_id,
+               worker_list AS worker_lists
+    FROM tasks
+    WHERE tasks.checker_id = p_checker_id
+    AND tasks.status = p_status;
+    END;
+    $$ LANGUAGE plpgsql;
+    '''
+
+    cursor.execute(create_table_query)
+    conn.commit()
+    cursor.close()
+    conn.close()
+
+
+def find_tasks_by_checker_and_status(checker_id, status):
+    conn = connect()
+    cursor = conn.cursor()
+
+    create_table_query = '''
+    SELECT find_tasks_by_checker_and_status(
+        %s,
+        %s
+    );
+    '''
+
+    task_data = (
+        checker_id,
+        status
+    )
+
+    cursor.execute(create_table_query, task_data)
+    res = cursor.fetchone()
+    cursor.close()
+    conn.close()
+    return res
+
+
+def find_task_by_worker_and_status(tg_id, status):
+    conn = connect()
+    cursor = conn.cursor()
+
+    create_table_query = '''
+    SELECT find_tasks_by_checker_and_status(
+        %s,
+        %s
+    );
+    '''
+
+    task_data = (
+        tg_id,
+        status
+    )
+
+    cursor.execute(create_table_query, task_data)
+    res = cursor.fetchone()
+    cursor.close()
+    conn.close()
+    return res
+
+
+def get_task_by_name_function():
+    conn = connect()
+    cursor = conn.cursor()
+
+    create_table_query = '''
+    CREATE OR REPLACE FUNCTION get_task_by_name(
+        task_name VARCHAR(255)
+    )
+        RETURNS SETOF tasks AS
+    $$
+    BEGIN
+        RETURN QUERY
+        SELECT *
+        FROM tasks
+        WHERE name = task_name;
+    END;
+    $$ LANGUAGE plpgsql;
+    '''
+
+    cursor.execute(create_table_query)
+    conn.commit()
+    cursor.close()
+    conn.close()
+
+
+def get_task_by_name(task_name):
+    conn = connect()
+    cursor = conn.cursor()
+
+    create_table_query = '''
+    SELECT get_task_by_name(
+        %s
+    );
+    '''
+
+    task_data = (
+        task_name,
+    )
+
+    cursor.execute(create_table_query, task_data)
+    res = cursor.fetchone()[0]
+    cursor.close()
+    conn.close()
+    return res
+
+
 def database_init():
     create_executors_table()
     create_checkers_table()
@@ -583,15 +757,19 @@ def database_init():
     create_add_task_function()
     update_task_files_function()
     update_task_status_function()
-    update_task_worker_list()
+    update_task_worker_list_function()
     get_array_len_function()
     get_array_value_function()
     get_task_data_function()
     get_task_name_by_worker_id_function()
     update_quest_list_trigger_function()
+    find_task_by_worker_and_status_function()
+    find_tasks_by_checker_and_status_function()
+    insert_executor_function()
+    get_task_by_name_function()
 
     print('Таблицы созданы')
 
 
 # if __name__ == '__main__':
-#     database_init()
+#     find_tasks_by_checker_and_status_function()

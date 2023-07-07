@@ -2,7 +2,8 @@ aiogram>=3.0.0b7
 environs~=9.0
 redis
 betterlogging
-json
+psycopg2-binary
+
 
 # # For enabling api:
 # backoff

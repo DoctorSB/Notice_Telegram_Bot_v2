@@ -4,18 +4,17 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, ReplyKeyboardRemove
 
 from tgbot.filters.admin import AdminFilter
-from tgbot.database.db import add_task, add_task_files, add_task_worker, get_array_len, get_array_values, get_task_data, get_task_names_by_worker_id, update_task_status, update_task_worker_list
+from tgbot.database.db import add_task, get_task_by_name, add_task_worker, find_tasks_by_checker_and_status
 
 
 from tgbot.misc.data_formater import date_formater
 from tgbot.misc.states import Admin
 
-from tgbot.keyboards.inline import task_preview_keyboard
+from tgbot.keyboards.inline import task_preview_keyboard, tasks_for_review_keyboard, task_keyboard
 
 from tgbot.models.quest import Quest
 from tgbot.models.checker import Checker
 
-import datetime
 
 admin_router = Router()
 admin_router.message.filter(AdminFilter())
@@ -25,13 +24,7 @@ checker = Checker()
 
 @admin_router.message(CommandStart())
 async def admin_start(message: Message):
-    await message.reply("Админка!", reply_markup=ReplyKeyboardRemove())
-
-
-@admin_router.message(Command(commands="remove_checker"))
-async def get_remove_checker_id(message: Message, state: FSMContext):  # type: ignore
-    await state.set_state(Admin.WAITING_FOR_REMOVE_CHECKER)
-    await message.answer("Введите id пользователя, которого хотите сделать проверяющим")
+    await message.reply("Вы проверяющий", reply_markup=ReplyKeyboardRemove())
 
 
 @admin_router.message(Command(commands="create_task"))
@@ -70,21 +63,34 @@ async def create_task(message: Message, state: FSMContext):
     await message.answer(f"Задание создано")
 
 
+# TODO: функция в бд для возвращения всех своих задач
 @admin_router.message(Command(commands="add_executor"))
 async def add_executor(message: Message, state: FSMContext):
-    await message.answer("Выберете задание для добавления исполнителя", reply_markup=task_preview_keyboard('tasks.json'))
+    await message.answer("Выберете задание для добавления исполнителя", reply_markup=task_preview_keyboard(message.from_user.id))
     await state.set_state(Admin.WAITING_FOR_TASK_ID)
 
 
 @admin_router.callback_query(Admin.WAITING_FOR_TASK_ID)
 async def get_task_id(query, state: FSMContext):
-    update_task_worker_list(query.data, query.from_user.id)
-    await query.message.edit_text(f"Исполнитель добавлен")
+    await state.update_data(task_id=query.data)
+    await query.message.edit_text(f"Перешлите сообщение от исполнителя")
     await state.set_state(Admin.WAITING_FOR_ADD_EXECUTOR)
 
 
 @admin_router.message(Admin.WAITING_FOR_ADD_EXECUTOR)
 async def add_executor_id(message: Message, state: FSMContext):
     info = await state.get_data()
-    add_task_worker(info['task_id'], message.forward_from.id)
+    add_task_worker(info['task_id'], 'worker_list',
+                    '{' + f'{message.forward_from.id}' + '}')
     await state.clear()
+
+
+@admin_router.message(F.text == "Проверить задания")
+async def get_task_to_check(message: Message, state: FSMContext):
+    await message.answer("Выберете задание для проверки",)
+    await state.set_state(Admin.WAITING_FOR_REVIEW)
+    task = find_tasks_by_checker_and_status(message.from_user.id, "waiting")
+    print(task)
+    for mes in task:
+        redy = mes[1:].split(',')
+        await message.answer(f"Задание: {redy[0]}\nОписание: {redy[1]}\nВремя на выполнение: {redy[7]}\nИсполнитель: {redy[9]}", reply_markup=task_keyboard)

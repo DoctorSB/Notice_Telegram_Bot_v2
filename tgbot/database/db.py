@@ -608,13 +608,58 @@ def find_task_by_worker_and_status_function():
     conn.close()
 
 
+def search_by_status_function():
+    conn = connect()
+    cursor = conn.cursor()
+
+    create_table_query = '''
+    CREATE OR REPLACE FUNCTION find_tasks_by_status(
+        search_status VARCHAR(255)
+    )
+    RETURNS TABLE (task_name VARCHAR(255)) AS
+    $$
+    BEGIN
+        RETURN QUERY
+        SELECT tasks.name AS task_name
+        FROM tasks
+       WHERE tasks.status = search_status;
+    END;
+    $$ LANGUAGE plpgsql;
+
+    '''
+
+    cursor.execute(create_table_query)
+    conn.commit()
+    cursor.close()
+    conn.close()
+
+def search_by_status(status):
+    conn = connect()
+    cursor = conn.cursor()
+
+    create_table_query = '''
+    SELECT find_tasks_by_status(
+        %s
+    );
+    '''
+
+    task_data = (
+        status,
+    )
+
+    cursor.execute(create_table_query, task_data)
+    res = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return res
+
 def find_tasks_by_checker_and_status_function():
     conn = connect()
     cursor = conn.cursor()
 
     create_table_query = '''
     
-CREATE OR REPLACE FUNCTION find_tasks_by_checker_and_status(
+    CREATE OR REPLACE FUNCTION find_tasks_by_checker_and_status(
         p_checker_id INTEGER,
         p_status VARCHAR(255)
         )
@@ -675,7 +720,8 @@ def find_tasks_by_checker_and_status(checker_id, status):
     )
 
     cursor.execute(create_table_query, task_data)
-    res = cursor.fetchone()
+    res = cursor.fetchall()
+    
     cursor.close()
     conn.close()
     return res
@@ -771,5 +817,5 @@ def database_init():
     print('Таблицы созданы')
 
 
-# if __name__ == '__main__':
-#     find_tasks_by_checker_and_status_function()
+if __name__ == '__main__':
+    search_by_status_function()

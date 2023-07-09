@@ -1,28 +1,35 @@
 from aiogram import Router
 from aiogram.filters import CommandStart, Command
 from aiogram.types import Message, ReplyKeyboardRemove
-from aiogram import types, Router, F
+from aiogram import Router
 from aiogram.fsm.context import FSMContext
+from aiogram import Bot
+
 
 from tgbot.misc.states import User
-from tgbot.database.db import add_task, add_task_files, add_task_worker, get_array_len, get_array_values, get_task_data, get_task_names_by_worker_id, update_task_status
+from tgbot.config import load_config
+from tgbot.database.db import add_task_files, add_task_worker, get_task_data, get_task_names_by_worker_id, update_task_status
 
 from tgbot.keyboards.reply import next_back_generator
-from tgbot.keyboards.inline import task_keyboard, task_preview_keyboard, task_work
+from tgbot.keyboards.inline import task_keyboard, task_preview_keyboard, task_work, active_tasks_keyboard
 from tgbot.text.shablons import ams_files, afy_files, apparat_files, materials_files
 
 user_router = Router()
 
+config = load_config(".env")
+bot = Bot(token=config.tg_bot.token, parse_mode='HTML')
+
 
 @user_router.message(CommandStart())
-async def user_start(message: Message):
+async def user_start(message: Message, state: FSMContext):
     await message.reply("Вы исполнитель", reply_markup=ReplyKeyboardRemove())
+    await state.clear()
 
 
 @user_router.message(Command(commands="get_task"))
 async def get_task(message: Message, state: FSMContext):
     await state.update_data(user_id=message.from_user.id)
-    await message.answer(f"Вот список заданий:", reply_markup=task_preview_keyboard(message.from_user.id))
+    await message.answer(f"Вот список заданий:", reply_markup=active_tasks_keyboard())
     await state.set_state(User.WAITING_FOR_TASK_NAME)
 
 
@@ -72,6 +79,7 @@ async def append_file(message: Message, state: FSMContext):
     faze = await state.get_data()
     if message.photo:
         photo = message.photo[-1]
+        await bot.download(file=photo, destination=f"files/{faze['task_name']}/{faze['step']}/{photo.file_id}.jpg")
         add_task_files(faze['task_name'], faze['step'],
                        '{' + f'{photo.file_id}' + '}')
     if message.text == 'Завершить':
@@ -101,4 +109,3 @@ async def choose_task(query, state: FSMContext):
         status = "waiting"
         info = await state.get_data()
         update_task_status(info['task_name'], status)
-        await state.clear()

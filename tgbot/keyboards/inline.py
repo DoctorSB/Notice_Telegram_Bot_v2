@@ -1,5 +1,5 @@
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
-from tgbot.database.db import get_task_names_by_worker_id, find_tasks_by_checker_and_status
+from tgbot.database.db import get_task_names_by_worker_id, find_tasks_by_checker_and_status, search_by_status
 
 
 
@@ -11,6 +11,14 @@ task_keyboard = InlineKeyboardMarkup(inline_keyboard=accept_button)
 
 def task_preview_keyboard(id):
     data = get_task_names_by_worker_id(id)
+    keyboard = []
+    for name in data:
+        keyboard.append([InlineKeyboardButton(text=name, callback_data=name)])
+    return InlineKeyboardMarkup(inline_keyboard=keyboard)
+
+
+def active_tasks_keyboard():
+    data = search_by_status("active")
     keyboard = []
     for name in data:
         keyboard.append([InlineKeyboardButton(text=name, callback_data=name)])

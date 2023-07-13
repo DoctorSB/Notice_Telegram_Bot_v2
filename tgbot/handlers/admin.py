@@ -11,6 +11,7 @@ from tgbot.misc.data_formater import date_formater
 from tgbot.misc.states import Admin
 
 from tgbot.keyboards.inline import task_preview_keyboard
+from tgbot.keyboards.reply import admin_keyboard
 
 from tgbot.models.quest import Quest
 from tgbot.models.checker import Checker
@@ -25,11 +26,11 @@ checker = Checker()
 
 @admin_router.message(CommandStart())
 async def admin_start(message: Message, state: FSMContext):
-    await message.reply("Вы проверяющий", reply_markup=ReplyKeyboardRemove())
+    await message.reply("Вы проверяющий", reply_markup=admin_keyboard)
     await state.clear()
 
 
-@admin_router.message(Command(commands="create_task"))
+@admin_router.message(F.text == "Создать задание")
 async def get_create_task_name(message: Message, state: FSMContext):
     await state.set_state(Admin.WAITING_FOR_TASK_NAME)
     await message.answer("Введите название задания")
@@ -72,7 +73,7 @@ async def create_task(message: Message, state: FSMContext):
 
 
 # TODO: функция в бд для возвращения всех своих задач
-@admin_router.message(Command(commands="add_executor"))
+@admin_router.message(F.text == "Добавить исполнителя")
 async def add_executor(message: Message, state: FSMContext):
     await message.answer("Выберете задание для добавления исполнителя", reply_markup=task_preview_keyboard(message.from_user.id))
     await state.set_state(Admin.WAITING_FOR_TASK_ID)
@@ -98,43 +99,3 @@ async def get_task_to_check(message: Message, state: FSMContext):
     await message.answer("Все файлы лежат в папке files/название задания/название этапа/название файла")
     await state.set_state(Admin.WAITING_FOR_REVIEW)
     await state.clear()
-
-    # task = find_tasks_by_checker_and_status(message.from_user.id, "waiting")
-    # for mes in task:
-    #     text = mes[0].split("','")
-    #     print(text[0])
-    # await message.answer(f'Наименование: {text[0]}\nОписание: {text[1]}\nВремя выполнения: {text[7]}\n Исполнитель: {text[9]}',
-    #                      reply_markup=task_keyboard)
-
-    # try:
-    #     photo_list = text[2]
-    #     photo_list = photo_list.split(',')
-    #     photos = [ photo.replace('{', '').replace('"{', '').replace('}', '').replace('}"', '').replace('"', '') for photo in photo_list]
-    #     print(photo_list, sep='\n')
-    #     await message.answer_photo(photos)
-    # except:
-    #     await message.answer("Фото нет")
-    # try:
-    #     photo_list = text[3]
-    #     photo_list = photo_list.split('\n')
-    #     for photo in photo_list:
-    #         photo = photo.replace('{', '').replace('"{', '').replace('}', '').replace('}"', '').replace('"', '')
-    #         await message.answer_photo(photo)
-    # except:
-    #     await message.answer("Фото нет")
-    # try:
-    #     photo_list = text[4]
-    #     photo_list = photo_list.split('\n')
-    #     for photo in photo_list:
-    #         photo = photo.replace('{', '').replace('"{', '').replace('}', '').replace('}"', '').replace('"', '')
-    #         await message.answer_photo(photo)
-    # except:
-    #     await message.answer("Фото нет")
-    # try:
-    #     photo_list = text[5]
-    #     photo_list = photo_list.split('\n')
-    #     for photo in photo_list:
-    #         photo = photo.replace('{', '').replace('"{', '').replace('}', '').replace('}"', '').replace('"', '')
-    #         await message.answer_photo(photo)
-    # except:
-    #     await message.answer("Фото нет")

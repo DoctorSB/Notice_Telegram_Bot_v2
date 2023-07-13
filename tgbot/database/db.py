@@ -796,6 +796,23 @@ def get_task_by_name(task_name):
     return res
 
 
+def get_task_where_menya_net(id):
+    conn = connect()
+    cursor = conn.cursor()
+
+    sql_query = """
+    SELECT name
+    FROM tasks
+    WHERE status = 'active'
+      AND NOT %s = ANY(worker_list);
+    """
+
+    cursor.execute(sql_query, (id,))
+    res = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return res
+
 def database_init():
     create_executors_table()
     create_checkers_table()
@@ -817,5 +834,5 @@ def database_init():
     print('Таблицы созданы')
 
 
-if __name__ == '__main__':
-    search_by_status_function()
+# if __name__ == '__main__':
+#     update_task_worker_list_function()

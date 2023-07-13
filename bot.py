@@ -11,7 +11,7 @@ from tgbot.handlers.admin import admin_router
 from tgbot.handlers.user import user_router
 from tgbot.middlewares.config import ConfigMiddleware
 from tgbot.services import broadcaster
-from tgbot.misc.commands import register_bot_commands
+# from tgbot.misc.commands import register_bot_commands
 
 logger = logging.getLogger(__name__)
 log_level = logging.INFO
@@ -19,7 +19,7 @@ bl.basic_colorized_config(level=log_level)
 
 
 async def on_startup(bot: Bot, admin_ids: list[int]):
-    await register_bot_commands(bot)
+    # await register_bot_commands(bot)
     await broadcaster.broadcast(bot, admin_ids, "Бот запущен")
 
 

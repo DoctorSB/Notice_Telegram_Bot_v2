@@ -3,6 +3,9 @@ environs~=9.0
 redis
 betterlogging
 psycopg2-binary
+google-api-python-client
+google-auth-httplib2
+google-auth-oauthlib
 
 # # For enabling api:
 # backoff

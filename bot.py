@@ -37,7 +37,7 @@ async def main():
     config = load_config(".env")
     if config.tg_bot.use_redis:
         storage = RedisStorage.from_url(config.redis.dsn(
-        ), key_builder=DefaultKeyBuilder(with_bot_id=True, with_destiny=True))
+        ), key_builder=DefaultKeyBuilder(with_botx_id=True, with_destiny=True))
     else:
         storage = MemoryStorage()
     bot = Bot(token=config.tg_bot.token, parse_mode='HTML')

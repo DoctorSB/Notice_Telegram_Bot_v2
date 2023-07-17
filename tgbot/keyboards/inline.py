@@ -1,5 +1,5 @@
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
-from tgbot.database.db import get_task_names_by_worker_id, find_tasks_by_checker_and_status, search_by_status, get_task_where_menya_net
+from tgbot.database.db import get_task_names_by_worker_id, find_tasks_by_checker_and_status, get_task_where_menya_net, get_array_len
 
 
 
@@ -37,5 +37,30 @@ def tasks_for_review_keyboard(id):
     keyboard = []
     for name in data:
         keyboard.append([InlineKeyboardButton(text=name, callback_data=name)])
+    return InlineKeyboardMarkup(inline_keyboard=keyboard)
+
+
+def photo_send_puncts_button_geberator(task):
+    ams_puncts_dict = {
+        'obsh_ams': 6,
+        'up_ams': 6,
+        'down_ams': 6,
+        'crop_ams': 6,
+        'shadow_ams': 12,
+        'connect_ams': 4
+    }
+    ams_puncts_list = ['Общий вид амс в полный', 'Верхняя часть AMC', 'Нижняя часть AMC', 'Bce опорные фланцы крупным планом', 'Фото скрытых работ', 'Место соединения троса']
+    keyboard = []
+    count = 0
+    for i in ams_puncts_dict.keys():
+        if get_array_len(task, i) is None:
+            photos_count = 0
+        else:
+            photos_count = get_array_len(task, i)
+        if photos_count >= ams_puncts_dict[i]:
+            keyboard.append([InlineKeyboardButton(text=f'{ams_puncts_list[count]} ✅', callback_data=i)])
+        else:
+            keyboard.append([InlineKeyboardButton(text=f'{ams_puncts_list[count]} ({get_array_len(task, i)}/{ams_puncts_dict[i]})', callback_data=i)])
+        count += 1
     return InlineKeyboardMarkup(inline_keyboard=keyboard)
 

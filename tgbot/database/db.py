@@ -61,10 +61,12 @@ def create_tasks_table():
             id          SERIAL PRIMARY KEY,
             name        VARCHAR(255) NOT NULL,
             description TEXT,
-            ams_files         TEXT[],
-            apparat_files       TEXT[],
-            afy_files       TEXT[],
-            materials_files       TEXT[],
+            obsh_ams    TEXT[],
+            up_ams      TEXT[],
+            down_ams    TEXT[],
+            crop_ams    TEXT[],
+            shadow_ams  TEXT[],
+            connect_ams TEXT[],
             status      VARCHAR(255),
             time        TIMESTAMP,
             checker_id  INTEGER,
@@ -398,10 +400,6 @@ def get_task_data_function():
             (
                 task_name        VARCHAR(255),
                 task_description TEXT,
-                task_ams_files         TEXT[],
-                task_apparat_files       TEXT[],
-                task_afy_files       TEXT[],
-                task_materials_files       TEXT[],
                 task_status      VARCHAR(255),
                 task_time        TIMESTAMP,
                 checkers_id      INTEGER,
@@ -413,10 +411,6 @@ def get_task_data_function():
         RETURN QUERY
             SELECT name         AS task_name,
                 description     AS task_description,
-                ams_files       AS task_ams_files,
-                afy_files       AS task_afy_files,
-                apparat_files   AS task_apparat_files,
-                materials_files AS task_materials_files,
                 status          AS task_status,
                 time            AS task_time,
                 checker_id      AS checkers_id,
@@ -667,10 +661,12 @@ def find_tasks_by_checker_and_status_function():
             (
                 task_name        VARCHAR(255),
                 task_description TEXT,
-                task_ams_files         TEXT[],
-                task_apparat_files       TEXT[],
-                task_afy_files       TEXT[],
-                task_materials_files       TEXT[],
+                task_obsh_ams    TEXT[],
+                task_up_ams      TEXT[],
+                task_down_ams    TEXT[],
+                task_crop_ams    TEXT[],
+                task_shadow_ams  TEXT[],
+                task_connect_ams TEXT[],
                 task_status      VARCHAR(255),
                 task_time        TIMESTAMP,
                 checkers_id      INTEGER,
@@ -681,15 +677,17 @@ def find_tasks_by_checker_and_status_function():
     BEGIN
         RETURN QUERY
         SELECT name        AS task_name,
-               description AS task_description,
-               ams_files           AS task_ams_files,
-               apparat_files AS task_apparat_files,
-               afy_files   AS task_afy_files,
-               materials_files AS task_materials_files,
-               status      AS task_status,
-               time        AS task_time,
-               checker_id  AS checkers_id,
-               worker_list AS worker_lists
+                description AS task_description,
+                obsh_ams    AS task_obsh_ams,
+                up_ams      AS task_up_ams,
+                down_ams    AS task_down_ams,
+                crop_ams    AS task_crop_ams,
+                shadow_ams  AS task_shadow_ams,
+                connect_ams AS task_connect_ams,
+                status      AS task_status,
+                time        AS task_time,
+                checker_id  AS checkers_id,
+                worker_list AS worker_lists
     FROM tasks
     WHERE tasks.checker_id = p_checker_id
     AND tasks.status = p_status;
@@ -803,9 +801,14 @@ def get_task_where_menya_net(id):
     sql_query = """
     SELECT name
     FROM tasks
-    WHERE status = 'active'
-      AND NOT %s = ANY(worker_list);
+    WHERE status = 'active' AND NOT EXISTS (
+        SELECT 1
+        FROM unnest(worker_list) AS w
+        WHERE w = %s
+    );
     """
+
+
 
     cursor.execute(sql_query, (id,))
     res = cursor.fetchall()
@@ -834,5 +837,5 @@ def database_init():
     print('Таблицы созданы')
 
 
-# if __name__ == '__main__':
-#     update_task_worker_list_function()
+if __name__ == '__main__':
+    database_init()

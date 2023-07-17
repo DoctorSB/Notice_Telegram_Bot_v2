@@ -8,6 +8,7 @@ class User(StatesGroup):
     ACCEPT_OR_CANCEL = State()
     WAIT_SEND_FILE = State()
     CHOOSE_TASK = State()
+    SEND_FILE_MENU = State()
     SEND_FILE = State()
 
 

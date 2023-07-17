@@ -1,5 +1,5 @@
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
-from tgbot.database.db import get_task_names_by_worker_id, find_tasks_by_checker_and_status, get_task_where_menya_net, get_array_len
+from tgbot.database.db import get_task_names_by_worker_id, find_tasks_by_checker_and_status, get_task_where_menya_net, get_array_len, get_names_for_admin
 
 
 
@@ -15,6 +15,16 @@ def task_preview_keyboard(id):
     for name in data:
         keyboard.append([InlineKeyboardButton(text=name, callback_data=name)])
     return InlineKeyboardMarkup(inline_keyboard=keyboard)
+
+def task_preview_keyboard_for_admin():
+    data = get_names_for_admin()
+    keyboard = []
+    for name in data:
+        new_name = name[0]
+        keyboard.append([InlineKeyboardButton(text=new_name, callback_data=new_name)])
+    return InlineKeyboardMarkup(inline_keyboard=keyboard)
+
+
 
 
 def active_tasks_keyboard(id):

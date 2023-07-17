@@ -18,5 +18,4 @@ class Admin(StatesGroup):
     WAITING_FOR_TASK_TIME_LIMIT = State()
     WAITING_FOR_ADD_EXECUTOR = State()
     WAITING_FOR_TASK_ID = State()
-    WAITING_FOR_REVIEW = State()
-    WAITING_PROVERKA = State()
+    WAITING_FOR_CHECK_TASK = State()

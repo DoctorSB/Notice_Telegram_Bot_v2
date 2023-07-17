@@ -5,13 +5,13 @@ from aiogram.types import Message, FSInputFile
 from aiogram import Bot
 
 from tgbot.filters.admin import AdminFilter
-from tgbot.database.db import add_task, add_task_worker, db_to_excel
+from tgbot.database.db import add_task, add_task_worker, db_to_excel, update_task_status
 
 from tgbot.config import load_config
 from tgbot.misc.data_formater import date_formater
 from tgbot.misc.states import Admin
 
-from tgbot.keyboards.inline import task_preview_keyboard
+from tgbot.keyboards.inline import task_preview_keyboard_for_admin, task_preview_keyboard
 from tgbot.keyboards.reply import admin_keyboard
 
 from tgbot.services.zipper import zip_folder
@@ -108,4 +108,17 @@ async def get_task_to_check(message: Message, state: FSMContext):
     await bot.send_document(message.from_user.id, ecel)
     os.remove('files.zip')
     os.remove('tasks.xlsx')
+    await state.clear()
+
+
+@admin_router.message(F.text == "Список заданий")
+async def get_task_list(message: Message, state: FSMContext):
+    await message.answer("Выберете задание которое нужно отправить на доработку", reply_markup=task_preview_keyboard_for_admin())
+    await state.set_state(Admin.WAITING_FOR_CHECK_TASK)
+
+
+@admin_router.callback_query(Admin.WAITING_FOR_CHECK_TASK)
+async def get_task_to_check(query, state: FSMContext):
+    update_task_status(query.data, "active")
+    await query.message.edit_text(f"Задание отправлено на доработку")
     await state.clear()

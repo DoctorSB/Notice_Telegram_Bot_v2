@@ -875,6 +875,20 @@ def db_to_excel():
     cursor.close()
     conn.close()
     
+def get_names_for_admin():
+    conn = connect()
+    cursor = conn.cursor()
+
+    sql_query = """
+    SELECT name
+    FROM tasks WHERE status = 'waiting';
+    """
+
+    cursor.execute(sql_query)
+    res = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return res
 
 
 def database_init():

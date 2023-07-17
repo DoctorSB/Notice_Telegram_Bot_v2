@@ -20,7 +20,7 @@ admin_buttons = [
         KeyboardButton(text="Добавить исполнителя"),
     ],
     [
-        KeyboardButton(text="Проверить задание")
+        KeyboardButton(text="Проверить задания")
     ],
     [
         KeyboardButton(text="Список заданий")

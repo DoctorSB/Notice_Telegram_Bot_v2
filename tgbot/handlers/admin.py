@@ -1,21 +1,26 @@
 from aiogram import Router, F
 from aiogram.filters import CommandStart
 from aiogram.fsm.context import FSMContext
-from aiogram.types import Message
+from aiogram.types import Message, FSInputFile
+from aiogram import Bot
 
 from tgbot.filters.admin import AdminFilter
-from tgbot.database.db import add_task, add_task_worker
+from tgbot.database.db import add_task, add_task_worker, db_to_excel
 
-
+from tgbot.config import load_config
 from tgbot.misc.data_formater import date_formater
 from tgbot.misc.states import Admin
 
 from tgbot.keyboards.inline import task_preview_keyboard
 from tgbot.keyboards.reply import admin_keyboard
 
+from tgbot.services.zipper import zip_folder
+
 
 import os
 
+config = load_config(".env")
+bot = Bot(token=config.tg_bot.token, parse_mode='HTML')
 
 admin_router = Router()
 admin_router.message.filter(AdminFilter())
@@ -95,6 +100,12 @@ async def add_executor_id(message: Message, state: FSMContext):
 
 @admin_router.message(F.text == "Проверить задания")
 async def get_task_to_check(message: Message, state: FSMContext):
-    await message.answer("Все файлы лежат в папке files/название задания/название этапа/название файла")
-    await state.set_state(Admin.WAITING_FOR_REVIEW)
+    db_to_excel()
+    zip_folder('files', 'files.zip')
+    zipka = FSInputFile('files.zip')
+    ecel = FSInputFile('tasks.xlsx')
+    await bot.send_document(message.from_user.id, zipka)
+    await bot.send_document(message.from_user.id, ecel)
+    os.remove('files.zip')
+    os.remove('tasks.xlsx')
     await state.clear()

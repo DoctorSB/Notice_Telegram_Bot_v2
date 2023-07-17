@@ -1,6 +1,6 @@
 import psycopg2
 from environs import Env
-from datetime import datetime
+import pandas as pd
 
 env = Env()
 env.read_env()
@@ -860,6 +860,22 @@ def get_task_where_menya_net(id):
     cursor.close()
     conn.close()
     return res
+
+def db_to_excel():
+    conn = connect()
+    cursor = conn.cursor()
+
+    sql_query = """
+    SELECT *
+    FROM tasks;
+    """
+
+    df = pd.read_sql_query(sql_query, conn)
+    df.to_excel("tasks.xlsx", index=False)
+    cursor.close()
+    conn.close()
+    
+
 
 def database_init():
     create_executors_table()

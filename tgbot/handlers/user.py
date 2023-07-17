@@ -75,7 +75,7 @@ async def choose_task(query, state: FSMContext):
 async def send_file_menu(query, state: FSMContext):
     info = await state.get_data()
     if query.data == "cancel":
-        await query.message.edit_text(f'{info["task_name"]}', reply_markup=photo_send_puncts_button_geberator(info['task_name']))
+        await query.message.edit_text(f'{info["task_name"]}', reply_markup=task_preview_keyboard(query.from_user.id))
         await state.set_state(User.CHOOSE_TASK)
     else:
         await state.update_data(step=query.data)
